@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Xml;
 
 class Xaml2Cs
 {
 	public Xaml2Cs ()
 	{
+		Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
 		types = new Dictionary<string,XamlType>();
 
 		types["AnimationTimeline"] = new XamlType("System.Windows.Media.Animation", "AnimationTimeline");
