@@ -1117,6 +1117,7 @@ namespace System.Windows.Interop
 
                 case WindowMessage.WM_WINDOWPOSCHANGED:
                     OnWindowPosChanged(lparam);
+					DoPaint();
                     break;
 
                 case WindowMessage.WM_SHOWWINDOW:
