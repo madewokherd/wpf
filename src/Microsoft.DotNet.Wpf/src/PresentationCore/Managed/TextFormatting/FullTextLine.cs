@@ -169,7 +169,7 @@ namespace Managed.TextFormatting
 					int runLength;
 					CharacterBufferRange chars = settings.FetchTextRun(pos, cpFirst, out textRun, out runLength);
 
-					if (lineLength > 0 && pos + runLength > cpFirst + lineLength)
+					if (lineLength > 0 && pos + chars.Length > cpFirst + lineLength)
 					{
 						runLength = cpFirst + lineLength - pos;
 						chars = new CharacterBufferRange(chars, 0, runLength);
@@ -182,7 +182,7 @@ namespace Managed.TextFormatting
 						break;
 					}
 
-					TextMetrics runMetrics = GetRunMetrics(fullText, textRun, chars);
+					TextMetrics runMetrics = GetRunMetrics(fullText, textRun, chars, paragraphWidth - result._textWidth);
 
 					if (content_ascent < runMetrics._textAscent)
 						content_ascent = runMetrics._textAscent;
@@ -371,7 +371,7 @@ namespace Managed.TextFormatting
 					false); // isSideways
 			}
 
-			private TextMetrics GetRunMetrics(FullTextState textState, TextRun textRun, CharacterBufferRange chars)
+			private TextMetrics GetRunMetrics(FullTextState textState, TextRun textRun, CharacterBufferRange chars, int remainingParagraphWidth)
 			{
 				if (textRun is TextCharacters)
 				{
@@ -391,6 +391,18 @@ namespace Managed.TextFormatting
 					var formatted = GetFormattedTextSymbols(textChars, chars, 0); // isSideways
 					result._textWidth = formatted.UnscaledWidth;
 
+					return result;
+				}
+				else if (textRun is TextEmbeddedObject)
+				{
+					var result = new TextMetrics();
+					var metric = ((TextEmbeddedObject)textRun).Format((double)remainingParagraphWidth / TextFormatterImp.ToIdeal);
+
+					result._textHeight = (int)Math.Round(metric.Height * TextFormatterImp.ToIdeal);
+					result._textWidth = (int)Math.Round(metric.Width * TextFormatterImp.ToIdeal);
+					result._baselineOffset = (int)Math.Round(metric.Baseline * TextFormatterImp.ToIdeal);
+					result._height = result._textHeight;
+					result._textAscent = result._baselineOffset;
 					return result;
 				}
 				else if (textRun is TextHidden)
@@ -465,6 +477,7 @@ namespace Managed.TextFormatting
 			{
 				internal int BidiLevel;
 				internal int CpFirst;
+				internal int Length;
 				internal TextRun TextRun;
 				internal CharacterBufferRange Range;
 			}
@@ -486,7 +499,7 @@ namespace Managed.TextFormatting
 					int runLength;
 					CharacterBufferRange chars = settings.FetchTextRun(pos, cpFirst, out run, out runLength);
 
-					if (runLength > remaining_length)
+					if (chars.Length > remaining_length)
 					{
 						runLength = remaining_length;
 						chars = new CharacterBufferRange(chars, 0, runLength);
@@ -499,6 +512,7 @@ namespace Managed.TextFormatting
 					ordered.TextRun = run;
 					ordered.Range = chars;
 					ordered.CpFirst = pos;
+					ordered.Length = runLength;
 					result.Add(ordered);
 
 					remaining_length -= runLength;
@@ -524,6 +538,7 @@ namespace Managed.TextFormatting
             {
 				origin = AdjustOffset(origin);
 				origin.Y += Baseline;
+				double paragraphWidth = (double)_paragraphWidth / TextFormatterImp.ToIdeal;
 
 				foreach (var ordered in ReorderRuns())
 				{
@@ -540,6 +555,13 @@ namespace Managed.TextFormatting
 						formatted.Draw(drawingContext, origin);
 
 						origin.X += formatted.Width;
+					}
+					else if (ordered.TextRun is TextEmbeddedObject)
+					{
+						var embedded = (TextEmbeddedObject)ordered.TextRun;
+
+						embedded.Draw(drawingContext, origin, (ordered.BidiLevel & 1) == 1, false);
+						origin.X += embedded.Format(paragraphWidth - origin.X).Width;
 					}
 					else if (ordered.TextRun is TextHidden)
 					{
@@ -577,8 +599,8 @@ namespace Managed.TextFormatting
 
 				int index = 0;
 				int length = 0;
-
-				distance -= GetOffsetToFirstRun().X;
+				double x = GetOffsetToFirstRun().X;
+				double paragraphWidth = (double)_paragraphWidth / TextFormatterImp.ToIdeal;
 
 				foreach (var ordered in ReorderRuns())
 				{
@@ -597,7 +619,7 @@ namespace Managed.TextFormatting
 						{
 							bool isInside;
 
-							var glyphCharacterHit = glyphrun.GetCaretCharacterHitFromDistance(distance, out isInside);
+							var glyphCharacterHit = glyphrun.GetCaretCharacterHitFromDistance(distance - x, out isInside);
 
 							index = glyphCharacterHit.FirstCharacterIndex + cpFirst;
 							length = glyphCharacterHit.TrailingLength;
@@ -608,11 +630,27 @@ namespace Managed.TextFormatting
 								break;
 							}
 
-							distance -= glyphrun.ComputeAlignmentBox().Width;
+							x += glyphrun.ComputeAlignmentBox().Width;
 							cpFirst += glyphrun.Characters.Count;
 						}
 						if (found)
 							break;
+					}
+					else if (ordered.TextRun is TextEmbeddedObject)
+					{
+						var width = ((TextEmbeddedObject)ordered.TextRun).Format(paragraphWidth - x).Width;
+
+						index = ordered.CpFirst;
+						length = ordered.Length;  // trailing edge
+
+						if (distance - x < width)
+						{
+							if (distance - x < width * 0.5)
+								length = 0;
+							break;
+						}
+
+						x += width;
 					}
 					else if (ordered.TextRun is TextHidden)
 					{
@@ -640,7 +678,7 @@ namespace Managed.TextFormatting
 			{
 				foreach (var ordered in ReorderRuns())
 				{
-					if (index >= ordered.CpFirst && index < ordered.CpFirst + ordered.Range.Length && !(ordered.TextRun is TextEndOfLine))
+					if (index >= ordered.CpFirst && index < ordered.CpFirst + ordered.Length && !(ordered.TextRun is TextEndOfLine))
 					{
 						run = ordered;
 						return true;
@@ -652,7 +690,7 @@ namespace Managed.TextFormatting
 
 			public override CharacterHit GetNextCaretCharacterHit(CharacterHit characterHit)
 			{
-				int desiredIndex = characterHit.FirstCharacterIndex + characterHit.TrailingLength + 1;
+				int desiredIndex = characterHit.FirstCharacterIndex + characterHit.TrailingLength;
 				OrderedTextRun run;
 				if (!GetRunContainingCp(desiredIndex, out run))
 				{
@@ -681,6 +719,7 @@ namespace Managed.TextFormatting
 						result = glyphrun.GetNextCaretCharacterHit(
 							new CharacterHit(characterHit.FirstCharacterIndex - glyphrun_start,
 								characterHit.TrailingLength));
+						result = new CharacterHit(result.FirstCharacterIndex + glyphrun_start, result.TrailingLength);
 
 						var glyphrun_length = glyphrun.Characters.Count;
 
@@ -690,6 +729,10 @@ namespace Managed.TextFormatting
 						glyphrun_start += glyphrun_length;
 					}
 					return result;
+				}
+				else if (run.TextRun is TextEmbeddedObject)
+				{
+					return new CharacterHit(run.CpFirst, run.Length);
 				}
 				else
 				{
@@ -728,13 +771,20 @@ namespace Managed.TextFormatting
 						var glyphrun_length = glyphrun.Characters.Count;
 
 						if (desiredIndex < glyphrun_start + glyphrun_length)
+						{
 							result = glyphrun.GetPreviousCaretCharacterHit(
 								new CharacterHit(characterHit.FirstCharacterIndex - glyphrun_start,
 									characterHit.TrailingLength));
+							result = new CharacterHit(result.FirstCharacterIndex + glyphrun_start, result.TrailingLength);
+						}
 
 						glyphrun_start += glyphrun_length;
 					}
 					return result;
+				}
+				else if (run.TextRun is TextEmbeddedObject)
+				{
+					return new CharacterHit(run.CpFirst, 0);
 				}
 				else
 				{
@@ -770,6 +820,10 @@ namespace Managed.TextFormatting
 					else
 						return new CharacterHit(desiredIndex, 0);
 				}
+				else if (run.TextRun is TextEmbeddedObject)
+				{
+					return new CharacterHit(run.CpFirst, 0);
+				}
 				else
 				{
 					throw new NotImplementedException(String.Format("Managed.TextFormatting.FullTextLine.GetPreviousCharacterHit for {0}", run.TextRun.GetType().FullName));
@@ -780,6 +834,7 @@ namespace Managed.TextFormatting
 			{
 				var result = new List<TextBounds>();
 				double x = GetOffsetToFirstRun().X;
+				double paragraphWidth = (double)_paragraphWidth / TextFormatterImp.ToIdeal;
 
 				foreach (var ordered in ReorderRuns())
 				{
@@ -793,7 +848,7 @@ namespace Managed.TextFormatting
 						var formatted = GetFormattedTextSymbols(textChars, ordered.Range, ordered.BidiLevel);
 
 						if (ordered.CpFirst <= firstTextSourceCharacterIndex + textLength - 1 &&
-							ordered.CpFirst + ordered.Range.Length >= firstTextSourceCharacterIndex)
+							ordered.CpFirst + ordered.Length >= firstTextSourceCharacterIndex)
 						{
 							var flowDirection = (ordered.BidiLevel & 1) == 1 ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
 							Rect? rectangle = null;
@@ -851,6 +906,22 @@ namespace Managed.TextFormatting
 						}
 
 						x += formatted.Width;
+					}
+					else if (ordered.TextRun is TextEmbeddedObject)
+					{
+						var width = ((TextEmbeddedObject)ordered.TextRun).Format(paragraphWidth - x).Width;
+
+						if (ordered.CpFirst <= firstTextSourceCharacterIndex + textLength - 1 &&
+							ordered.CpFirst + ordered.Length >= firstTextSourceCharacterIndex)
+						{
+							var flowDirection = (ordered.BidiLevel & 1) == 1 ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+							var runBounds = new List<TextRunBounds>();
+							var rectangle = new Rect(x, 0, width, Height);
+
+							runBounds.Add(new TextRunBounds(rectangle, ordered.CpFirst, ordered.CpFirst + ordered.Length, ordered.TextRun));
+							result.Add(new TextBounds(rectangle, flowDirection, runBounds));
+						}
+						x += width;
 					}
 					else if (ordered.TextRun is TextHidden)
 					{
@@ -929,6 +1000,10 @@ namespace Managed.TextFormatting
 							result.Add(new IndexedGlyphRun(cpFirst, glyphrun.Characters.Count, glyphrun));
 							cpFirst += glyphrun.Characters.Count;
 						}
+					}
+					else if (ordered.TextRun is TextEmbeddedObject)
+					{
+						// Nothing to do.
 					}
 					else if (ordered.TextRun is TextHidden)
 					{
