@@ -18,7 +18,7 @@
 #if !defined(_ARM_) && !defined(_ARM64_)
 #include "xmmintrin.h"
 #elif defined (_ARM64_) 
-#include "arm64_neon.h"
+#include "arm_neon.h"
 #endif
 
 // See soblend.cpp for a description of SrcOver and SrcOverAL

@@ -930,30 +930,36 @@ CRadialGradientBrushSpan::ReleaseExpensiveResources()
 // The functions below are only used on some architectures, and it's not worth marking which.
 #pragma clang diagnostic ignored "-Wunused-function"
 
+#ifdef _BUILD_SSE_
 static CXmmFloat TFloat_sqrt(const CXmmFloat& x)
 {
 	return CXmmFloat::Sqrt(x);
 }
+#endif
 
 static FLOAT TFloat_sqrt(FLOAT x)
 {
 	return sqrtf(x);
 }
 
+#ifdef _BUILD_SSE_
 static CXmmFloat TFloat_min(const CXmmFloat& x, const CXmmFloat& y)
 {
 	return CXmmFloat::Min(x, y);
 }
+#endif
 
 static FLOAT TFloat_min(FLOAT x, FLOAT y)
 {
 	return min(x, y);
 }
 
+#ifdef _BUILD_SSE_
 static int TFloat_round(const CXmmFloat& x)
 {
 	return x.Round();
 }
+#endif
 
 static int TFloat_round(FLOAT x)
 {
