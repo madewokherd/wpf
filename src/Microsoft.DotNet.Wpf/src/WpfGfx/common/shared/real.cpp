@@ -380,7 +380,7 @@ GpRealInstrinsics::Pow(
     
     // CDoubleFPU::AssertMode();
 
-#if defined(_X86_)
+#if !defined(NOASM) && defined(_X86_)
     
     static const double fpone = 1.0;
 
@@ -555,7 +555,7 @@ REAL GpModF(REAL x, REAL y)
 //-------------------------------------------------------------------------
 int CFloatFPU::LargeRound(float x)
 {
-#if defined(_X86_)
+#if !defined(NOASM) && defined(_X86_)
     if (CCPUInfo::HasSSE())
     {
         FI fi;
