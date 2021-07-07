@@ -1,0 +1,13 @@
+../../Shared/RefAssemblyAttrs.cs
+../Shared/Microsoft/Windows/Themes/DataGridHeaderBorder.cs
+../Shared/Microsoft/Windows/Themes/KnownTypeHelper.cs
+../Shared/Microsoft/Windows/Themes/PlatformCulture.cs
+../Shared/Microsoft/Windows/Themes/SystemDropShadowChrome.cs
+Microsoft/Windows/Themes/BulletChrome.cs
+Microsoft/Windows/Themes/ButtonChrome.cs
+Microsoft/Windows/Themes/DataGridHeaderBorder.cs
+Microsoft/Windows/Themes/ListBoxChrome.cs
+Microsoft/Windows/Themes/ProgressBarHighlightConverter.cs
+Microsoft/Windows/Themes/ScrollChrome.cs
+Microsoft/Windows/Themes/ScrollGlyph.cs
+AssemblyVersion.cs
