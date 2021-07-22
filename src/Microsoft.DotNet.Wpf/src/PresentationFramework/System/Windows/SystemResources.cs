@@ -893,19 +893,89 @@ namespace System.Windows
                 }
             }
 
-            /// <summary>
-            ///     Loads a ResourceDictionary from within an assembly's .NET resource store.
-            /// </summary>
-            /// <param name="assembly">The owning assembly.</param>
-            /// <param name="assemblyName">The name of the owning assembly.</param>
-            /// <param name="resourceName">The name of the desired theme resource.</param>
-            /// <param name="isTraceEnabled">Whether tracing is enabled.</param>
-            /// <param name="dictionarySourceUri">
-            ///     Returns the pack:// Uri of the baml from which the ResourceDictionary instance returned
-            ///     by this method was loaded. This Uri is captured for use with <see cref="ResourceDictionaryDiagnostics"/>.
-            /// </param>
-            /// <returns>The dictionary if found and loaded successfully, null otherwise.</returns>
-            private ResourceDictionary LoadDictionary(Assembly assembly, string assemblyName, string resourceName, bool isTraceEnabled, out Uri dictionarySourceUri)
+            private ResourceDictionary LoadDictionaryBaml(Assembly assembly, string assemblyName, string resourceName, bool isTraceEnabled, out Uri dictionarySourceUri)
+            {
+                ResourceDictionary dictionary = null;
+                dictionarySourceUri = null;
+
+                // Create the resource manager that will load the byte array
+                ResourceManager rm = new ResourceManager(assemblyName + ".g", assembly);
+
+                resourceName = resourceName + ".baml";
+                // Load the resource stream
+                Stream stream = null;
+                try
+                {
+                    stream = rm.GetStream(resourceName, CultureInfo.CurrentUICulture);
+                }
+                // There is no ResourceManager.HasManifest in order to detect this case before an exception is thrown.
+                // Likewise, there is no way to know if loading a resource will fail prior to loading it.
+                // So, the exceptions must be caught. stream will continue to be null and handled accordingly later.
+#pragma warning disable 6502
+
+                catch (MissingManifestResourceException)
+                {
+                    // No usable resources in the assembly
+                }
+                catch (MissingSatelliteAssemblyException)
+                {
+                    // No usable resources in the assembly
+                }
+#if !DEBUG
+                catch (InvalidOperationException)
+                {
+                    // Object not stored correctly
+                }
+#endif
+
+#pragma warning restore 6502
+
+                if (stream != null)
+                {
+                    Baml2006ReaderSettings settings = new Baml2006ReaderSettings();
+                    settings.OwnsStream = true;
+                    settings.LocalAssembly = assembly;
+
+                    // For system themes, we don't seem to be passing the BAML Uri to the Baml2006Reader
+                    Baml2006Reader bamlReader = new Baml2006ReaderInternal(stream, new Baml2006SchemaContext(settings.LocalAssembly), settings);
+
+                    System.Xaml.XamlObjectWriterSettings owSettings = XamlReader.CreateObjectWriterSettingsForBaml();
+                    if (assembly != null)
+                    {
+                        owSettings.AccessLevel = XamlAccessLevel.AssemblyAccessTo(assembly);
+
+                        AssemblyName asemblyName = new AssemblyName(assembly.FullName);
+                        Uri streamUri = null;
+                        string packUri = string.Format("pack://application:,,,/{0};v{1};component/{2}", asemblyName.Name, asemblyName.Version.ToString(), resourceName);
+                        if (Uri.TryCreate(packUri, UriKind.Absolute, out streamUri))
+                        {
+                            if (XamlSourceInfoHelper.IsXamlSourceInfoEnabled)
+                            {
+                                owSettings.SourceBamlUri = streamUri;
+                            }
+
+                            dictionarySourceUri = streamUri;
+                        }
+                    }
+
+                    System.Xaml.XamlObjectWriter writer = new System.Xaml.XamlObjectWriter(bamlReader.SchemaContext, owSettings);
+
+                    System.Xaml.XamlServices.Transform(bamlReader, writer);
+
+                    dictionary = (ResourceDictionary)writer.Result;
+
+                    if (isTraceEnabled && (dictionary != null))
+                    {
+                        EventTrace.EventProvider.TraceEvent(EventTrace.Event.WClientResourceBamlAssembly,
+                                                            EventTrace.Keyword.KeywordXamlBaml, EventTrace.Level.Verbose,
+                                                            assemblyName);
+                    }
+                }
+
+                return dictionary;
+            }
+
+            private ResourceDictionary LoadDictionaryXaml(Assembly assembly, string assemblyName, string resourceName, bool isTraceEnabled, out Uri dictionarySourceUri)
             {
                 ResourceDictionary dictionary = null;
                 dictionarySourceUri = null;
@@ -987,6 +1057,26 @@ namespace System.Windows
 
                 return dictionary;
             }
+
+            /// <summary>
+            ///     Loads a ResourceDictionary from within an assembly's .NET resource store.
+            /// </summary>
+            /// <param name="assembly">The owning assembly.</param>
+            /// <param name="assemblyName">The name of the owning assembly.</param>
+            /// <param name="resourceName">The name of the desired theme resource.</param>
+            /// <param name="isTraceEnabled">Whether tracing is enabled.</param>
+            /// <param name="dictionarySourceUri">
+            ///     Returns the pack:// Uri of the baml from which the ResourceDictionary instance returned
+            ///     by this method was loaded. This Uri is captured for use with <see cref="ResourceDictionaryDiagnostics"/>.
+            /// </param>
+            /// <returns>The dictionary if found and loaded successfully, null otherwise.</returns>
+            private ResourceDictionary LoadDictionary(Assembly assembly, string assemblyName, string resourceName, bool isTraceEnabled, out Uri dictionarySourceUri)
+			{
+				ResourceDictionary result = LoadDictionaryBaml(assembly, assemblyName, resourceName, isTraceEnabled, out dictionarySourceUri);
+				if (result == null)
+					result = LoadDictionaryXaml(assembly, assemblyName, resourceName, isTraceEnabled, out dictionarySourceUri);
+				return result;
+			}
 
             internal static void OnThemeChanged()
             {
