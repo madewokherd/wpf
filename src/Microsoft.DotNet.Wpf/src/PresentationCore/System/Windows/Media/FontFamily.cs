@@ -59,7 +59,31 @@ namespace System.Windows.Media
         /// Null font is the font that has metrics but logically does not support any Unicode codepoint
         /// so whatever text we throw at it would result in being mapped to missing glyph.
         /// </summary>
-        internal static readonly CanonicalFontFamilyReference NullFontFamilyCanonicalName = CanonicalFontFamilyReference.Create(null, "#ARIAL");
+        private static CanonicalFontFamilyReference _nullFontFamilyCanonicalName;
+
+		private static bool TryNullFontFamily(string name)
+		{
+			var refname = CanonicalFontFamilyReference.Create(null, name);
+			var family = LookupFontFamily(refname);
+			if (family != null)
+				_nullFontFamilyCanonicalName = refname;
+			return (family != null);
+		}
+
+		// We can't assume Arial exists on Wine, so try a few more
+		internal static CanonicalFontFamilyReference NullFontFamilyCanonicalName
+		{
+			get {
+				if (_nullFontFamilyCanonicalName == null)
+				{
+					Invariant.Assert(
+						TryNullFontFamily("#ARIAL") ||
+						TryNullFontFamily("#LIBERATION SANS") ||
+						TryNullFontFamily("#TAHOMA"));
+				}
+				return _nullFontFamilyCanonicalName;
+			}
+		}
 
         internal const string GlobalUI = "#GLOBAL USER INTERFACE";
 
