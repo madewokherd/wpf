@@ -790,7 +790,6 @@ CHw3DGeometryRenderer<TDiffuseOrNormal>::PrepareIndexed(
     void *pLockedOutputVertices = NULL;
 
     UINT cIndicesToCopy = 0;
-    UINT cVerticesToCopy = 0;
     
     Assert(m_cInputIndices % 3 == 0);
 
@@ -820,8 +819,6 @@ CHw3DGeometryRenderer<TDiffuseOrNormal>::PrepareIndexed(
             pLockedOutputVertices,
             m_cInputVertices
             );
-
-        cVerticesToCopy = m_cInputVertices;
     }
 
     //

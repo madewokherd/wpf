@@ -226,8 +226,6 @@ CGraphWalker::GotoSibling(__deref_out IGraphNode** ppSibling)
 VOID
 CGraphWalker::GotoParent(__deref_out IGraphNode** ppParent)
 {
-    HRESULT hr = S_OK;
-
     Assert(ppParent);
     
 #ifdef DBG
@@ -239,7 +237,6 @@ CGraphWalker::GotoParent(__deref_out IGraphNode** ppParent)
     {
         // We don't have another parent.
         *ppParent = NULL;
-        hr = S_FALSE;
 
 #ifdef DBG
         m_walkable = false;

@@ -117,9 +117,6 @@ CScanPipelineRendering::InitializeForRendering(
 
     BOOL fDestOpaque = !HasAlphaChannel(fmtDest);
 
-    BOOL fBrushDataChanged = false;  // True if we do something to the color
-                                     // data, like masking it.
-
     //
     // Generate brush color data
     //
@@ -147,8 +144,6 @@ CScanPipelineRendering::InitializeForRendering(
             &fmtColorSource
             ));
 
-
-        fBrushDataChanged = true;
     }
 
     //
@@ -161,7 +156,6 @@ CScanPipelineRendering::InitializeForRendering(
         // calls SetAntialiasedFiller().
 
         IFC( builder.AddOp_ScalePPAACoverage(fmtColorSource, fComplementAlpha, &fmtColorSource) );
-        fBrushDataChanged = true;
     }
 
     //

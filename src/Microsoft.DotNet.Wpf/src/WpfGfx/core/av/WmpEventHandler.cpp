@@ -456,11 +456,7 @@ CWmpEventHandler::ScriptCommand(
         // The parameter information associated with the type
     )
 {
-    HRESULT hr = S_OK;
-
-    TRACEF(&hr);
-
-    hr = m_pMediaInstance->GetMediaEventProxy().RaiseEvent(
+    m_pMediaInstance->GetMediaEventProxy().RaiseEvent(
                 AVMediaScriptCommand,
                 scType,
                 Param);

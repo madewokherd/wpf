@@ -632,8 +632,6 @@ CHwShaderFragmentToHLSLConverter::DeclareSamplers(
         ShaderFunction const &fragment = *m_rgPipelineItems[uItem].pFragment;
         PixelShaderFunction const &pixelShader = fragment.PixelShader;
 
-        bool fSamplersWritten = false;
-
         for (UINT uPSInput = 0; uPSInput < pixelShader.NumFunctionParameters; uPSInput++)
         {
             if (pixelShader.rgPixelFunctionParameter[uPSInput] == PixelFunctionParameter::Sampler)
@@ -651,8 +649,6 @@ CHwShaderFragmentToHLSLConverter::DeclareSamplers(
                     ";\n"
                     "\n"
                     );
-
-                fSamplersWritten = true;
             }
         }
     }
