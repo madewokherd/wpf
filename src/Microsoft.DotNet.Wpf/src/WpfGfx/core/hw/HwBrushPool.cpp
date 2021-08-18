@@ -472,9 +472,12 @@ CHwBrushPoolManager::AllocateHwBrush(
         // brushes.
         //
 
+#if DBG || RETAILDEBUGLIB || defined(ANALYSIS)
         LONG cOutstanding;
 
-        cOutstanding = InterlockedIncrement(&m_cOutstandingBrushes);
+        cOutstanding =
+#endif
+		InterlockedIncrement(&m_cOutstandingBrushes);
 
         Assert(cOutstanding > 0);
     }

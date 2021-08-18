@@ -721,7 +721,9 @@ CHwShaderFragmentToHLSLConverter::WriteVertexShaderDataStructures(
         ShaderFunction const &fragment = *(m_rgPipelineItems[uItem].pFragment);
         VertexShaderFunction const &vertexShader = fragment.VertexShader;
 
+#if DBG || RETAILDEBUGLIB || defined(ANALYSIS)
         bool fInputDataFound = false;
+#endif
 
         for (UINT uVSInput = 0; uVSInput < vertexShader.NumFunctionParameters; uVSInput++)
         {
@@ -794,7 +796,9 @@ CHwShaderFragmentToHLSLConverter::WriteVertexShaderDataStructures(
                     "\n"
                     );
 
+#if DBG || RETAILDEBUGLIB || defined(ANALYSIS)
                 fInputDataFound = true;
+#endif
             }
         }
 

@@ -825,7 +825,9 @@ CMILResourceCache::EnsureCount(
 #if RESOURCE_CACHE_SINGLE_THREADED
     Assert(m_cInCall > 0);
 #else !RESOURCE_CACHE_SINGLE_THREADED
+#if DBG || RETAILDEBUGLIB || defined(ANALYSIS)
     LONG cInCall;
+#endif
 
     //
     // This thread must have taken shared access
@@ -836,7 +838,10 @@ CMILResourceCache::EnsureCount(
     //
 
     Assert(m_cInCall > 0);
-    cInCall = InterlockedDecrement(&m_cInCall);
+#if DBG || RETAILDEBUGLIB || defined(ANALYSIS)
+    cInCall =
+#endif
+	InterlockedDecrement(&m_cInCall);
     Assert(cInCall >= 0);
 
     //

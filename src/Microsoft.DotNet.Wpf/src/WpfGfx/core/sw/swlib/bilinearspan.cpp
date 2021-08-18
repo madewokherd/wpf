@@ -1589,7 +1589,9 @@ void CBilinearSpan::GenerateColors(
             int vert_min;
             int horiz_max;
             int vert_max;
+#if defined(_X86_)
             int isFlipped = 0;
+#endif
 
             if (u >= flipTileUMin)
             {
@@ -1599,7 +1601,9 @@ void CBilinearSpan::GenerateColors(
 
                 horiz_max = static_cast<INT>(inflipTileUMax);
                 horiz_min = static_cast<INT>(flipTileUMin);
+#if defined(_X86_)
                 isFlipped = 1;
+#endif
             }
             else
             {
@@ -1616,7 +1620,9 @@ void CBilinearSpan::GenerateColors(
                 Assert(flipTileVMin <= INT_MAX);
                 vert_max = static_cast<INT>(inflipTileVMax);
                 vert_min = static_cast<INT>(flipTileVMin);
+#if defined(_X86_)
                 isFlipped = 1;
+#endif
             }
             else
             {
