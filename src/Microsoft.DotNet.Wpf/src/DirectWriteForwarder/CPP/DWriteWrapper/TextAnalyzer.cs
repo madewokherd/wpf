@@ -13,18 +13,19 @@ namespace MS.Internal.Text.TextInterface
 {
 public class TextAnalyzer
 {
+	IDWriteFactory _factory;
 	IDWriteTextAnalyzer _textAnalyzer;
 
-    public TextAnalyzer(IDWriteTextAnalyzer textAnalyzer)
+    public TextAnalyzer(IDWriteFactory factory, IDWriteTextAnalyzer textAnalyzer)
     {
+        _factory = factory;
         _textAnalyzer = textAnalyzer;
     }
 
-    unsafe static public IList<Span> Itemize(
+    unsafe public IList<Span> Itemize(
         char* 							 text,
         uint                             length,
         CultureInfo                      culture,
-        Factory                          factory,
         bool                             isRightToLeftParagraph,
         CultureInfo                      numberCulture,
         bool                             ignoreUserOverride,
@@ -35,13 +36,8 @@ public class TextAnalyzer
         // If a text has zero length then we do not need to itemize.
         if (length > 0)
         {
-            IDWriteTextAnalyzer pTextAnalyzer = null;
             TextAnalyzerSink textAnalyzerSink = null;
             TextAnalyzerSource textAnalyzerSource = null;
-
-            IDWriteFactory pDWriteFactory = factory.DWriteFactory;
-
-			pTextAnalyzer = pDWriteFactory.CreateTextAnalyzer();
 			
 			string numberSubstitutionLocaleName = numberCulture != null ? numberCulture.IetfLanguageTag : null;
 
@@ -53,7 +49,7 @@ public class TextAnalyzer
 											 text,
 											 length,
 											 culture.IetfLanguageTag,
-											 pDWriteFactory,
+											 _factory,
 											 isRightToLeftParagraph,
 											 numberSubstitutionLocaleName,
 											 ignoreUserOverride,
@@ -62,13 +58,13 @@ public class TextAnalyzer
 			textAnalyzerSink = new TextAnalyzerSink();
 
 			// Analyze the script ranges.
-			pTextAnalyzer.AnalyzeScript(textAnalyzerSource,
+			_textAnalyzer.AnalyzeScript(textAnalyzerSource,
 										0,
 										length,
 										textAnalyzerSink);
 
 			// Analyze the number substitution ranges.
-			pTextAnalyzer.AnalyzeNumberSubstitution(textAnalyzerSource,
+			_textAnalyzer.AnalyzeNumberSubstitution(textAnalyzerSource,
 													0,
 													length,
 													textAnalyzerSink);
@@ -87,7 +83,7 @@ public class TextAnalyzer
 
     }
 
-    static IList<Span> AnalyzeExtendedAndItemize(
+    IList<Span> AnalyzeExtendedAndItemize(
         TextItemizer textItemizer, 
         IntPtr text, 
         uint length, 
@@ -104,7 +100,7 @@ public class TextAnalyzer
 		return textItemizer.Itemize(numberCulture, pCharAttribute);
     }
 
-    public static void AnalyzeExtendedCharactersAndDigits(
+    public void AnalyzeExtendedCharactersAndDigits(
         IntPtr                           text,
         uint                             length,
         TextItemizer                     textItemizer,
@@ -851,13 +847,8 @@ public class TextAnalyzer
 		uint range_start, uint range_length, bool isRightToLeft, CultureInfo numberCulture,
 		bool ignoreUserOverride, uint numberSubstitutionMethod)
 	{
-		IDWriteTextAnalyzer pTextAnalyzer = null;
 		TextAnalyzerSink textAnalyzerSink = null;
 		TextAnalyzerSource textAnalyzerSource = null;
-
-		IDWriteFactory pDWriteFactory = factory.DWriteFactory;
-
-		pTextAnalyzer = pDWriteFactory.CreateTextAnalyzer();
 
 		string numberSubstitutionLocaleName = numberCulture != null ? numberCulture.IetfLanguageTag : null;
 
@@ -865,7 +856,7 @@ public class TextAnalyzer
 										 text_ptrs,
 										 lengths,
 										 culture.IetfLanguageTag,
-										 pDWriteFactory,
+										 _factory,
 										 isRightToLeft,
 										 numberSubstitutionLocaleName,
 										 ignoreUserOverride,
@@ -875,7 +866,7 @@ public class TextAnalyzer
 
 		textAnalyzerSink.InitializeLineBreakpoints((int)range_start, (int)(range_start + range_length));
 
-		pTextAnalyzer.AnalyzeLineBreakpoints(textAnalyzerSource, range_start, range_length, textAnalyzerSink);
+		_textAnalyzer.AnalyzeLineBreakpoints(textAnalyzerSource, range_start, range_length, textAnalyzerSink);
 
 		return textAnalyzerSink.LineBreakpoints;
 	}	

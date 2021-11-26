@@ -117,11 +117,10 @@ namespace MS.Internal.Shaping
             {
                 checked 
                 {
-                    spans = MS.Internal.Text.TextInterface.TextAnalyzer.Itemize(
+                    spans = MS.Internal.FontCache.DWriteFactory.Instance.CreateTextAnalyzer().Itemize(
                         (char*)ptext.ToPointer(),
                         (uint)stringLength,
                         culture,
-                        MS.Internal.FontCache.DWriteFactory.Instance,
                         isRightToLeftParagraph,
                         digitCulture,
                         ignoreUserOverride,

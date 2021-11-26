@@ -15,6 +15,7 @@ namespace MS.Internal.Text.TextInterface
 		/// A pointer to the wrapped DWrite factory object.
 		/// </summary>
 		IDWriteFactory _pFactory;
+		IDWriteTextAnalyzer _pTextAnalyzer;
 				  
 		/// <summary>
 		/// The custom loader used by WPF to load font collections.
@@ -152,6 +153,7 @@ namespace MS.Internal.Text.TextInterface
 			Marshal.ThrowExceptionForHR(hr);
 
 			_pFactory = factoryTemp;
+			_pTextAnalyzer = _pFactory.CreateTextAnalyzer();
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -378,9 +380,7 @@ namespace MS.Internal.Text.TextInterface
 
 		public TextAnalyzer CreateTextAnalyzer()
 		{
-			IDWriteTextAnalyzer textAnalyzer = null;
-			textAnalyzer = _pFactory.CreateTextAnalyzer();
-			return new TextAnalyzer(textAnalyzer);
+			return new TextAnalyzer(_pFactory, _pTextAnalyzer);
 		}
 
 		public override bool IsInvalid
