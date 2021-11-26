@@ -14,6 +14,12 @@ LONG_PTR WINAPI GetWindowLongPtrWrapper(HWND hwnd, INT index)
 	return GetWindowLongPtrW(hwnd, index);
 }
 
+INT WINAPI GetWindowTextWrapper(HWND hwnd, LPWSTR string, INT length)
+{
+	SetLastError(0);
+	return GetWindowTextW(hwnd, string, length);
+}
+
 HWND WINAPI GetParentWrapper(HWND hwnd)
 {
 	SetLastError(0);
