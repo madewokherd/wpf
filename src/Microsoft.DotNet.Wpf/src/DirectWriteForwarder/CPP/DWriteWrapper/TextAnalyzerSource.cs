@@ -14,10 +14,14 @@ namespace MS.Internal.Text.TextInterface
 
 		uint TextLength;
 
+		IDWriteFactory _factory;
 		TextSegment[] TextSegments;
-		IDWriteNumberSubstitution NumberSubstitution;
 		GCHandle PinnedLocaleName;
 		DWriteReadingDirection ReadingDirection;
+
+		string _numberCulture;
+		bool _ignoreUserOverride;
+		uint _numberSubstitutionMethod;
 
 		internal TextAnalyzerSource(char* text, uint length, string culture,
 			IDWriteFactory factory, bool isRightToLeft, string numberCulture,
@@ -29,9 +33,12 @@ namespace MS.Internal.Text.TextInterface
 			segment.end = length;
 			TextSegments = new TextSegment[] { segment };
 			TextLength = length;
-			NumberSubstitution = factory.CreateNumberSubstitution(numberSubstitutionMethod, numberCulture, ignoreUserOverride);
 			PinnedLocaleName = GCHandle.Alloc(culture, GCHandleType.Pinned);
 			ReadingDirection = isRightToLeft ? DWriteReadingDirection.RightToLeft : DWriteReadingDirection.LeftToRight;
+			_factory = factory;
+			_numberCulture = numberCulture;
+			_ignoreUserOverride = ignoreUserOverride;
+			_numberSubstitutionMethod = numberSubstitutionMethod;
 		}
 
 		internal TextAnalyzerSource(IntPtr[] text_ptrs, uint[] lengths, string culture,
@@ -50,9 +57,12 @@ namespace MS.Internal.Text.TextInterface
 				TextSegments[i] = segment;
 			}
 			TextLength = pos;
-			NumberSubstitution = factory.CreateNumberSubstitution(numberSubstitutionMethod, numberCulture, ignoreUserOverride);
 			PinnedLocaleName = GCHandle.Alloc(culture, GCHandleType.Pinned);
 			ReadingDirection = isRightToLeft ? DWriteReadingDirection.RightToLeft : DWriteReadingDirection.LeftToRight;
+			_factory = factory;
+			_numberCulture = numberCulture;
+			_ignoreUserOverride = ignoreUserOverride;
+			_numberSubstitutionMethod = numberSubstitutionMethod;
 		}
 
 		private bool FindSegmentAtPosition(uint position, out int segment_index)
@@ -133,7 +143,7 @@ namespace MS.Internal.Text.TextInterface
 		public void GetNumberSubstitution(uint position, out uint text_len, out IDWriteNumberSubstitution substitution)
 		{
 			text_len = TextLength - position;
-			substitution = NumberSubstitution;
+			substitution = _factory.CreateNumberSubstitution(_numberSubstitutionMethod, _numberCulture, _ignoreUserOverride);
 		}
 	}
 }
