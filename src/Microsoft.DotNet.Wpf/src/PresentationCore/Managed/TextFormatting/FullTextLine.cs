@@ -284,9 +284,9 @@ namespace Managed.TextFormatting
 					// check for line wrap
 					if (pap.Wrap && _metrics._textStart + _metrics._textWidthAtTrailing > finiteFormatWidth)
 					{
-						var lineBreakpoints = store.FindLineBreakpoints(cpFirst, lineLength);
+						var lineBreakpoints = store.FindLineBreakpoints(cpFirst, lineLength-_metrics._cchNewline);
 
-						for (int i=lineLength-1; i > 0; i--)
+						for (int i=lineLength-_metrics._cchNewline-1; i > 0; i--)
 						{
 							if (lineBreakpoints.GetBreakConditionBefore(i+cpFirst) == DWriteBreakCondition.CanBreak)
 							{
