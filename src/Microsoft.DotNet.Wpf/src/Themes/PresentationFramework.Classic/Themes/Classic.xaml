@@ -17,7 +17,7 @@ To automatically copy the files, set the environment variable
 
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:theme="clr-namespace:Microsoft.Windows.Themes"
+                    xmlns:theme="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic"
                     xmlns:ui="clr-namespace:System.Windows.Documents;assembly=PresentationUI"
                     xmlns:framework="clr-namespace:MS.Internal;assembly=PresentationFramework"
                     xmlns:base="clr-namespace:System.Windows;assembly=WindowsBase">
@@ -776,7 +776,7 @@ To automatically copy the files, set the environment variable
     ==================================================================-->
 
     <LinearGradientBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type Calendar}, ResourceId=CalendarBackgroundBrush}"
-        x:Shared="false" StartPoint="0.5,0" EndPoint="0.5,1">
+        StartPoint="0.5,0" EndPoint="0.5,1"> <!-- x:Shared="false" can't be used when not compiling to BAML -->
         <GradientStop Color="{DynamicResource {x:Static SystemColors.ActiveCaptionColorKey}}" Offset="0"/>
         <GradientStop Color="{DynamicResource {x:Static SystemColors.ActiveCaptionColorKey}}" Offset="0.16"/>
         <GradientStop Color="{DynamicResource {x:Static SystemColors.WindowColorKey}}" Offset="0.16"/>
