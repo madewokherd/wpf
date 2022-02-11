@@ -297,8 +297,13 @@ namespace Managed.TextFormatting
 						{
 							// Try an estimate based on known widths
 							int mid = (int)((finiteFormatWidth - _metrics._textStart) * (max / widthAtMax));
-							if (mid <= min && min < max)
-								mid = min+1;
+							if (mid <= min)
+							{
+								if (min < max)
+									mid = min+1;
+								else
+									mid = min;
+							}
 							else if (mid > max)
 								mid = (min + max + 1) / 2;
 
