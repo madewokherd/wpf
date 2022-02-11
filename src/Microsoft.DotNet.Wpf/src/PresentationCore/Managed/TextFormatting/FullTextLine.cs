@@ -286,20 +286,59 @@ namespace Managed.TextFormatting
 					{
 						var lineBreakpoints = store.FindLineBreakpoints(cpFirst, lineLength-_metrics._cchNewline);
 
-						for (int i=lineLength-_metrics._cchNewline-1; i > 0; i--)
+						// binary search for the longest fitting line - this assumes line lengths at breakpoints are increasing
+
+						double widthAtMax = _metrics._textWidthAtTrailing;
+						int min = 1;
+						int max = lineLength - _metrics._cchNewline-1;
+						TextMetrics? trimmedMetricsAtMin = null;
+
+						while (min <= max)
 						{
-							if (lineBreakpoints.GetBreakConditionBefore(i+cpFirst) == DWriteBreakCondition.CanBreak)
+							// Try an estimate based on known widths
+							int mid = (int)((finiteFormatWidth - _metrics._textStart) * (max / widthAtMax));
+							if (mid <= min && min < max)
+								mid = min+1;
+							else if (mid > max)
+								mid = (min + max + 1) / 2;
+
+							// Find the next index where we can linebreak
+							int i;
+							for (i = mid; i <= max; i++)
 							{
-								var trailingWhitespace = lineBreakpoints.WhitespaceLengthBefore(i+cpFirst);
-								var trimmedMetrics = GetLineMetrics(fullText, cpFirst, i - trailingWhitespace, formatWidth, finiteFormatWidth, paragraphWidth, lineFlags, collapsingSymbol);
-								if (trimmedMetrics._textStart + trimmedMetrics._textWidthAtTrailing <= finiteFormatWidth)
+								if (lineBreakpoints.GetBreakConditionBefore(i+cpFirst) == DWriteBreakCondition.CanBreak)
+									break;
+							}
+							if (i > max)
+							{
+								// No breakpoints between here and max
+								max = mid-1;
+								continue;
+							}
+							var trailingWhitespace = lineBreakpoints.WhitespaceLengthBefore(i+cpFirst);
+							TextMetrics trimmedMetrics;
+							if (i == min && trimmedMetricsAtMin is TextMetrics val)
+								trimmedMetrics = val;
+							else
+								trimmedMetrics = GetLineMetrics(fullText, cpFirst, i - trailingWhitespace, formatWidth, finiteFormatWidth, paragraphWidth, lineFlags, collapsingSymbol);
+							if (trimmedMetrics._textStart + trimmedMetrics._textWidthAtTrailing <= finiteFormatWidth)
+							{
+								// Can break here
+								min = i;
+								if (min == max)
 								{
+									// Found the best possible breakpoint.
 									_metrics = GetLineMetrics(fullText, cpFirst, i, formatWidth, finiteFormatWidth, paragraphWidth, lineFlags, collapsingSymbol);
 									_metrics._cchTrailing = trailingWhitespace;
 									_metrics._textWidthAtTrailing = trimmedMetrics._textWidth;
 									break;
 								}
+								trimmedMetricsAtMin = trimmedMetrics;
+								continue;
 							}
+							// Segment is too long to break here
+							widthAtMax = trimmedMetrics._textWidthAtTrailing;
+							max = mid - 1;
 						}
 					}
 				}
