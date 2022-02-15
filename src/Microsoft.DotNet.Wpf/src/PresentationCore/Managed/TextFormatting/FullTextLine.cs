@@ -626,7 +626,8 @@ namespace Managed.TextFormatting
 
 			public override TextLine Collapse(params TextCollapsingProperties[] collapsingPropertiesList)
 			{
-				throw new NotImplementedException("Managed.TextFormatting.FullTextLine.Collapse");
+				// Stub implementation, just returns original for now.
+				return this;
 			}
 
 			public override IList<TextCollapsedRange> GetTextCollapsedRanges()

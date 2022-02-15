@@ -547,9 +547,6 @@ namespace Managed.TextFormatting
 
             Invariant.Assert(_settings != null);
 
-			throw new NotImplementedException("Managed.TextFormatting.SimpleTextLine:Collapse");
-
-/*
             // instantiate a collapsible full text line, collapse it and return the collapsed line
             TextMetrics.FullTextLine textLine = new TextMetrics.FullTextLine(
                 _settings,
@@ -580,7 +577,6 @@ namespace Managed.TextFormatting
             }
 
             return textLine;
-*/
         }
 
 
