@@ -31,6 +31,10 @@ namespace System
             {
                 case ".NETFramework":
                     {
+                        if (targetFrameworkVersion == 40500)
+                        {
+                            LocalAppContext.DefineSwitchDefault(FrameworkAppContextSwitches.AllowTwoWayBindingOnNonPublicSetterSwitchName, true);
+                        }
                         if (targetFrameworkVersion <= 40502)
                         {
                             LocalAppContext.DefineSwitchDefault(FrameworkAppContextSwitches.DoNotApplyLayoutRoundingToMarginsAndBorderThicknessSwitchName, true);
@@ -73,6 +77,8 @@ namespace System
             LocalAppContext.DefineSwitchDefault(FrameworkAppContextSwitches.AppendLocalAssemblyVersionForSourceUriSwitchName, false);
             LocalAppContext.DefineSwitchDefault(FrameworkAppContextSwitches.KeyboardNavigationFromHyperlinkInItemsControlIsNotRelativeToFocusedElementSwitchName, false);
             LocalAppContext.DefineSwitchDefault(FrameworkAppContextSwitches.ItemAutomationPeerKeepsItsItemAliveSwitchName, false);
+
+            LocalAppContext.DefineSwitchDefault(FrameworkAppContextSwitches.AllowTwoWayBindingOnNonPublicSetterSwitchName, false);
 
             // UseAdornerForTextboxSelectionRenderingSwitchName is always true, i.e., disabled by default. 
             // Do not initialized this again - this was initialized earlier in PopulateDefaultValuesPartial unconditionally.

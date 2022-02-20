@@ -129,6 +129,17 @@ namespace MS.Internal
                 return LocalAppContext.GetCachedSwitchValue(ItemAutomationPeerKeepsItsItemAliveSwitchName, ref _ItemAutomationPeerKeepsItsItemAlive);
             }
         }
+
+        internal const string AllowTwoWayBindingOnNonPublicSetterSwitchName = "Switch.System.Windows.Data.Binding.AllowTwoWayBindingOnNonPublicSetter";
+        private static int _AllowTwoWayBindingOnNonPublicSetter;
+        public static bool AllowTwoWayBindingOnNonPublicSetter
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return LocalAppContext.GetCachedSwitchValue(AllowTwoWayBindingOnNonPublicSetterSwitchName, ref _AllowTwoWayBindingOnNonPublicSetter);
+            }
+        }
     }
 
 #pragma warning restore 436
