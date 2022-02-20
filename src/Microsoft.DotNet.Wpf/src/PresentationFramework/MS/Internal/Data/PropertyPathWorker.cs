@@ -1616,7 +1616,7 @@ namespace MS.Internal.Data
 
             if (pi != null)
             {
-                if (IsPropertyReadOnly(item, pi))
+                if (IsPropertyReadOnly(item, pi) && !FrameworkAppContextSwitches.AllowTwoWayBindingOnNonPublicSetter)
                     throw new InvalidOperationException(SR.Get(SRID.CannotWriteToReadOnly, item.GetType(), pi.Name));
             }
             else if (pd != null)
