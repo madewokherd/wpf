@@ -163,7 +163,7 @@ namespace Managed.TextFormatting
 
 				result._textWidth = settings.TextIndent;
 
-				while (lineLength <= 0 || cpFirst + lineLength > pos)
+				while ((lineLength <= 0 || cpFirst + lineLength > pos) && result._cchNewline == 0)
 				{
 					TextRun textRun;
 					int runLength;
@@ -175,7 +175,18 @@ namespace Managed.TextFormatting
 						chars = new CharacterBufferRange(chars, 0, runLength);
 					}
 
-					if (textRun is TextEndOfParagraph || textRun is TextEndOfLine)
+					for (int i=0; i<runLength && i<chars.Length; i++)
+					{
+						if (chars[i] == '\n')
+						{
+							runLength = i + 1;
+							chars = new CharacterBufferRange(chars, 0, runLength);
+							result._cchNewline = 1;
+							break;
+						}
+					}
+
+					if (textRun is TextEndOfParagraph || textRun is TextEndOfLine || chars[0] == '\n')
 					{
 						pos += runLength;
 						result._cchNewline = runLength;
