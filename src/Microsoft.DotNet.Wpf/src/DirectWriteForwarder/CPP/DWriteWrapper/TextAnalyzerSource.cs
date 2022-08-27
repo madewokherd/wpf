@@ -103,7 +103,7 @@ namespace MS.Internal.Text.TextInterface
 			if (FindSegmentAtPosition(position, out index))
 			{
 				var segment = TextSegments[index];
-				text = IntPtr.Add(segment.ptr, (int)(position - segment.start));
+				text = IntPtr.Add(segment.ptr, (int)(position - segment.start) * 2);
 				text_len = segment.end - position;
 			}
 			else
