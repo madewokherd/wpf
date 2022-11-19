@@ -507,8 +507,6 @@ namespace Managed.TextFormatting
                     _metrics._formatter.IdealToReal(_metrics._height, PixelsPerDip)
                     );
 
-				origin = AdjustOffset(origin);
-
                 if (antiInversion == null)
                 {
                     DrawTextLine(drawingContext, origin, null);
