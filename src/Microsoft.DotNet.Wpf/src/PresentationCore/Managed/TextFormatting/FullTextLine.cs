@@ -57,6 +57,7 @@ namespace Managed.TextFormatting
             private Brush                               _defaultTextDecorationsBrush;   // Default brush for paragraph text decorations
             private TextFormattingMode                  _textFormattingMode;            // The TextFormattingMode of the line (Ideal or Display).
 			private List<TextSpan<TextRun>>				_textRunSpans;					// List of TextRun objects in this line and their lengths
+			private Rect								_boundingBox;					// Box that includes all drawn shapes in this line
 
             [Flags]
             private enum StatusFlags
@@ -489,17 +490,9 @@ namespace Managed.TextFormatting
 				return new Point(orig.X + ofs.X, orig.Y + ofs.Y);
 			}
 
-			public override void Draw(DrawingContext drawingContext, Point origin, InvertAxes inversion)
+			private void DrawInternal(DrawingContext drawingContext, Point origin, InvertAxes inversion)
 			{
-                if (drawingContext == null)
-                {
-                    throw new ArgumentNullException("drawingContext");
-                }
-
-                if ((_statusFlags & StatusFlags.IsDisposed) != 0)
-                {
-                    throw new ObjectDisposedException(SR.Get(SRID.TextLineHasBeenDisposed));
-                }
+				// This function allows us to skip the null DrawingContext check, for BoundingBox calculation.
 
                 MatrixTransform antiInversion = TextFormatterImp.CreateAntiInversionTransform(
                     inversion,
@@ -524,6 +517,34 @@ namespace Managed.TextFormatting
                         drawingContext.Pop();
                     }
                 }
+			}
+
+			public override void Draw(DrawingContext drawingContext, Point origin, InvertAxes inversion)
+			{
+                if (drawingContext == null)
+                {
+                    throw new ArgumentNullException("drawingContext");
+                }
+
+                if ((_statusFlags & StatusFlags.IsDisposed) != 0)
+                {
+                    throw new ObjectDisposedException(SR.Get(SRID.TextLineHasBeenDisposed));
+                }
+
+				DrawInternal(drawingContext, origin, inversion);
+			}
+
+			private void CheckBoundingBox()
+			{
+                if ((_statusFlags & StatusFlags.IsDisposed) != 0)
+                {
+                    throw new ObjectDisposedException(SR.Get(SRID.TextLineHasBeenDisposed));
+                }
+				if ((_statusFlags & StatusFlags.BoundingBoxComputed) == 0)
+				{
+					DrawInternal(null, new Point(0, 0), InvertAxes.None);
+				}
+				Debug.Assert((_statusFlags & StatusFlags.BoundingBoxComputed) != 0);
 			}
 
 			internal struct OrderedTextRun
@@ -592,6 +613,7 @@ namespace Managed.TextFormatting
 				origin = AdjustOffset(origin);
 				origin.Y += Baseline;
 				double paragraphWidth = (double)_paragraphWidth / TextFormatterImp.ToIdeal;
+				Rect boundingBox = Rect.Empty;
 
 				foreach (var ordered in ReorderRuns())
 				{
@@ -605,7 +627,9 @@ namespace Managed.TextFormatting
 						//FIXME: Rendering loses precision compared to measurement in Ideal units
 						var formatted = GetFormattedTextSymbols(textChars, ordered.Range, ordered.BidiLevel);
 
-						formatted.Draw(drawingContext, origin);
+						var runBoundingBox = formatted.Draw(drawingContext, origin);
+
+						boundingBox.Union(runBoundingBox);
 
 						origin.X += formatted.Width;
 					}
@@ -613,7 +637,13 @@ namespace Managed.TextFormatting
 					{
 						var embedded = (TextEmbeddedObject)ordered.TextRun;
 
-						embedded.Draw(drawingContext, origin, (ordered.BidiLevel & 1) == 1, false);
+						if (!(drawingContext is null))
+							embedded.Draw(drawingContext, origin, (ordered.BidiLevel & 1) == 1, false);
+
+						var runBoundingBox = embedded.ComputeBoundingBox((ordered.BidiLevel & 1) == 1, false);
+
+						boundingBox.Union(Rect.Offset(runBoundingBox, origin.X, origin.Y));
+
 						origin.X += embedded.Format(paragraphWidth - origin.X).Width;
 					}
 					else if (ordered.TextRun is TextHidden)
@@ -630,7 +660,10 @@ namespace Managed.TextFormatting
 					}
 				}
 
-				//FIXME: collapsingsymbol & overhang calculation
+				_boundingBox = boundingBox;
+				_statusFlags |= StatusFlags.BoundingBoxComputed;
+
+				//FIXME: collapsingsymbol calculation
             }
 
 			public override TextLine Collapse(params TextCollapsingProperties[] collapsingPropertiesList)
@@ -1191,7 +1224,10 @@ namespace Managed.TextFormatting
 			{
 				get
 				{
-					throw new NotImplementedException("Managed.TextFormatting.FullTextLine.get_Extent");
+					CheckBoundingBox();
+					if (_boundingBox.IsEmpty)
+						return 0;
+					return _boundingBox.Bottom - _boundingBox.Top;
 				}
 			}
 
@@ -1199,7 +1235,10 @@ namespace Managed.TextFormatting
 			{
 				get
 				{
-					throw new NotImplementedException("Managed.TextFormatting.FullTextLine.get_OverhangLeading");
+					CheckBoundingBox();
+					if (_boundingBox.IsEmpty)
+						return 0;
+					return _boundingBox.Left - Start;
 				}
 			}
 
@@ -1207,7 +1246,10 @@ namespace Managed.TextFormatting
 			{
 				get
 				{
-					throw new NotImplementedException("Managed.TextFormatting.FullTextLine.get_OverhangTrailing");
+					CheckBoundingBox();
+					if (_boundingBox.IsEmpty)
+						return 0;
+					return Start + Width - _boundingBox.Right;
 				}
 			}
 
@@ -1215,7 +1257,10 @@ namespace Managed.TextFormatting
 			{
 				get
 				{
-					throw new NotImplementedException("Managed.TextFormatting.FullTextLine.get_OverhangAfter");
+					CheckBoundingBox();
+					if (_boundingBox.IsEmpty)
+						return 0;
+					return _boundingBox.Bottom - Height;
 				}
 			}
 
