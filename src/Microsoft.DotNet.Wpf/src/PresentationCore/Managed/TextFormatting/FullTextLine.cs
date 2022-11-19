@@ -1273,7 +1273,8 @@ namespace Managed.TextFormatting
 			{
 				get
 				{
-					throw new NotImplementedException("Managed.TextFormatting.FullTextLine.get_HasCollapsed");
+					// FIXME: Not set anywhere
+                	return (_statusFlags & StatusFlags.HasCollapsed) != 0;
 				}
 			}
 
