@@ -9102,7 +9102,7 @@ TODO:
                             <!-- Draw Checkmark border and tick mark -->
                             <theme:ClassicBorderDecorator x:Name="CheckMark"
                                                           BorderStyle="Sunken"
-                                                          Background="{TemplateBinding Background}"
+                                                          Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
                                                           BorderThickness="{TemplateBinding BorderThickness}"
                                                           BorderBrush="{TemplateBinding BorderBrush}">
                                 <Path x:Name="CheckMarkPath"
@@ -9110,7 +9110,7 @@ TODO:
                                       Width="7"
                                       Height="7"
                                       FlowDirection="LeftToRight"
-                                      Fill="{TemplateBinding Foreground}"
+                                      Fill="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}"
                                       Data="M 0 2.0 L 0 4.8 L 2.5 7.4 L 7.1 2.8 L 7.1 0 L 2.5 4.6 Z"/>
                             </theme:ClassicBorderDecorator>
                         </BulletDecorator.Bullet>
