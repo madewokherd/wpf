@@ -5,7 +5,7 @@ LIB_FLAGS=-unsafe -delaysign+ -keyfile:../../reactive.pub -define:REACHFRAMEWORK
 
 LIB_REFS=-r:mscorlib.dll -r:System.dll -r:System.Xml.dll -r:System.Core.dll -r:System.Drawing.dll -r:System.Security.dll
 
-LIB_REF_FILES=../System.Xaml/System.Xaml.dll ../WindowsBase/WindowsBase.dll ../DirectWriteForwarder/DirectWriteForwarder.dll ../PresentationCore/PresentationCore.dll ../../cycle-breakers/PresentationFramework/PresentationFramework-ReachFramework-impl-cycle.dll ../System.Printing/ref/System.Printing.dll
+LIB_REF_FILES=../System.Xaml/System.Xaml.dll ../WindowsBase/WindowsBase.dll ../PresentationCore/PresentationCore.dll ../../cycle-breakers/PresentationFramework/PresentationFramework-ReachFramework-impl-cycle.dll ../System.Printing/ref/System.Printing.dll
 
 LIB_SRCS=$(shell cat sources.list)
 

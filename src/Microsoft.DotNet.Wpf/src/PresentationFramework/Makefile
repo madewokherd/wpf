@@ -5,7 +5,7 @@ LIB_FLAGS=-unsafe -delaysign+ -keyfile:../../reactive.pub -define:FRAMEWORK_NATI
 
 LIB_REFS=-r:mscorlib.dll -r:System.dll -r:System.Xml.dll -r:System.Core.dll -r:System.Security.dll -r:System.Configuration.dll -r:System.IO.Compression.dll
 
-LIB_REF_FILES=../System.Xaml/System.Xaml.dll ../WindowsBase/WindowsBase.dll ../UIAutomation/UIAutomationTypes/UIAutomationTypes.dll ../UIAutomation/UIAutomationProvider/UIAutomationProvider.dll ../DirectWriteForwarder/DirectWriteForwarder.dll ../PresentationCore/PresentationCore.dll ../ReachFramework/ReachFramework.dll ../../cycle-breakers/PresentationUI/PresentationUI-PresentationFramework-impl-cycle.dll ../System.Printing/ref/System.Printing.dll $(ACCESSIBILITY_DLL)
+LIB_REF_FILES=../System.Xaml/System.Xaml.dll ../WindowsBase/WindowsBase.dll ../UIAutomation/UIAutomationTypes/UIAutomationTypes.dll ../UIAutomation/UIAutomationProvider/UIAutomationProvider.dll ../PresentationCore/PresentationCore.dll ../ReachFramework/ReachFramework.dll ../../cycle-breakers/PresentationUI/PresentationUI-PresentationFramework-impl-cycle.dll ../System.Printing/ref/System.Printing.dll $(ACCESSIBILITY_DLL)
 
 LIB_SRCS=$(shell cat sources.list)
 

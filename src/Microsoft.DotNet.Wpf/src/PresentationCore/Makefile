@@ -5,7 +5,7 @@ LIB_FLAGS=-unsafe -delaysign+ -keyfile:../../reactive.pub -define:CORE_NATIVEMET
 
 LIB_REFS=-r:mscorlib.dll -r:System.dll -r:System.Xml.dll -r:System.Core.dll -r:System.Security.dll -r:System.Configuration.dll -r:System.IO.Compression.dll
 
-LIB_REF_FILES=../System.Xaml/System.Xaml.dll ../WindowsBase/WindowsBase.dll ../System.Windows.Input.Manipulations/System.Windows.Input.Manipulations.dll ../UIAutomation/UIAutomationTypes/UIAutomationTypes.dll ../UIAutomation/UIAutomationProvider/UIAutomationProvider.dll ../DirectWriteForwarder/DirectWriteForwarder.dll
+LIB_REF_FILES=../System.Xaml/System.Xaml.dll ../WindowsBase/WindowsBase.dll ../System.Windows.Input.Manipulations/System.Windows.Input.Manipulations.dll ../UIAutomation/UIAutomationTypes/UIAutomationTypes.dll ../UIAutomation/UIAutomationProvider/UIAutomationProvider.dll
 
 LIB_SRCS=$(shell cat sources.list)
 
