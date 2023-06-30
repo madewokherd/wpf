@@ -119,7 +119,7 @@ public:
         e0 <<= HFD32_ADDITIONAL_SHIFT;
         e1 <<= HFD32_ADDITIONAL_SHIFT;
     
-        register LONG lShift = cShift - HFD32_ADDITIONAL_SHIFT;
+        LONG lShift = cShift - HFD32_ADDITIONAL_SHIFT;
     
         if (lShift < 0)
         {
@@ -151,7 +151,7 @@ public:
     MIL_FORCEINLINE VOID vTakeStep()
     {
         e0 += e1;
-        register LONG lTemp = e2;
+        LONG lTemp = e2;
         e1 += lTemp;
         e2 += lTemp - e3;
         e3 = lTemp;
