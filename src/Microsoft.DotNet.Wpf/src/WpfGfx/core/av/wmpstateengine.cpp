@@ -1874,7 +1874,7 @@ HandleStateChange(
     )
 {
     HRESULT hr = S_OK;
-    int i = 0;
+    IF_DBG(int i = 0;)
 
     TRACEF(&hr);
     Assert(m_stateThreadId == GetCurrentThreadId());
@@ -1933,8 +1933,8 @@ HandleStateChange(
         //
         while (m_nextSubArcMethodStack.IsEmpty() && m_currentInternalState != m_targetInternalState)
         {
-            i++;
-            AssertMsg(i < 20, "Infinite loop detected");
+            IF_DBG(i++;)
+            IF_DBG(AssertMsg(i < 20, "Infinite loop detected");)
             Assert(m_currentInternalState == m_pendingInternalState);
 
             IFC(BeginNewTransition());
