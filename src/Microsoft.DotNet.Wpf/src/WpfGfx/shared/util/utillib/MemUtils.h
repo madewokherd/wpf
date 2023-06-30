@@ -220,8 +220,10 @@ inline void __cdecl operator delete[](void *pv) noexcept;
 //  }
 
 // Placement new - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#if 0 // This declaration conflicts with llvm-mingw headers. It's unclear to me why WPF needs a separate declaration
 _Ret_notnull_ _Post_writable_byte_size_(cb) _Post_satisfies_(return == pv)
 inline __bcount(cb) void * __cdecl operator new(size_t cb, _Writable_bytes_(cb) void * pv) noexcept;
+#endif
 
 // Per class new/delete override macros - - - - - - - - - - - - - - - - - - - -
 
