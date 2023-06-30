@@ -487,7 +487,9 @@ GpRealInstrinsics::Pow(
 *
 \**************************************************************************/
 
+#ifndef __GNUC__
 #pragma optimize("gt", on)
+#endif
 
 double
 GpRealInstrinsics::Exp(
@@ -497,7 +499,9 @@ GpRealInstrinsics::Exp(
 #undef exp
     return exp(x);
 }
+#ifndef __GNUC__
 #pragma optimize("", on)
+#endif
 
 // This definition assumes y > 0.
 // GpModF(x, Inf) = x, as long as x != Inf.

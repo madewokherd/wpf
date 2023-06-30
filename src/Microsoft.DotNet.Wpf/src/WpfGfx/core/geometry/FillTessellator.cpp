@@ -23,7 +23,9 @@
 
 #include "precomp.hpp"
 
+#ifndef __GNUC__
 #pragma optimize("t", on)
+#endif
 
 MtDefine(CRectFillTessellator, MILRender, "CRectFillTessellator");
 MtDefine(CRegionFillTessellator, MILRender, "CRegionFillTessellator");

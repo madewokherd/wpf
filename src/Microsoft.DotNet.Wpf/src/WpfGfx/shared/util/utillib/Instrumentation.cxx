@@ -101,7 +101,9 @@ EnsureStackCaptureRegisteredWithWER()
 // to in a predictable manner.
 //
 // x64 doesn't have frame pointers and this pragma causes a warning
+#ifndef __GNUC__
 #pragma optimize("y", off) // disable FPO
+#endif
 #endif
 
 __declspec(noinline) void 
@@ -246,7 +248,9 @@ MilInstrumentationHandleFailure(
 #ifndef _AMD64_
 // Compiler docs say that turning on optimization back on doesn't actually turn it on
 // but instead resets it to whatever was specified with /O
+#ifndef __GNUC__
 #pragma optimize("y", on) // disable FPO
+#endif
 #endif
 
 //+-----------------------------------------------------------------------

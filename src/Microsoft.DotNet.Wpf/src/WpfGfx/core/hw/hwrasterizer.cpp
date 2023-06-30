@@ -26,7 +26,9 @@ DeclareTag(tagDisableTrapezoids, "MIL-HW", "Disable trapezoids");
 // Optimize for speed instead of size for these critical methods
 //
 
+#ifndef __GNUC__
 #pragma optimize( "t", on )
+#endif
 
 //-------------------------------------------------------------------------
 //

@@ -25,7 +25,9 @@
 *
 **************************************************************************/
 
+#ifndef __GNUC__
 #pragma optimize("t", on)
+#endif
 
 #include <wpfsdl.h>
 // system includes

@@ -91,7 +91,9 @@ namespace GpRealInstrinsics
     is switched on, with g optimization on the in-line function calls will be
     removed completely.
 */
+#ifndef __GNUC__
 #pragma optimize("g", on)
+#endif
     inline double InlineSin(double x) { return sin(x); }
     inline double InlineCos(double x) { return cos(x); }
     inline double InlineTan(double x) { return tan(x); }
@@ -102,7 +104,9 @@ namespace GpRealInstrinsics
     inline double InlineLog10(double x) { return log10(x); }
     inline double InlineExp(double x) { return exp(x); }
 /* Restore default optimization. */
+#ifndef __GNUC__
 #pragma optimize("", on)
+#endif
 
     // Out-of-line math functions
     // pow: We implemented it ourselves
