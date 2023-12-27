@@ -36,7 +36,7 @@ CXX_FLAGS=-c -Wall -Wno-format -Wno-unknown-pragmas -Wno-endif-labels -Wno-reord
 
 C_FLAGS=-c -D_WIN32_WINNT=0x0602 -D__WINESRC__ --std=c99 -Wall -Wno-format -Werror $(INCLUDE_DIRS:%=-I%) $(CFLAGS)
 
-LINK_FLAGS=-lgdi32 -lntdll -ld3dx9 -lwindowscodecs -lwinmm -luuid -ldwrite -lole32 -loleaut32 -static-libstdc++ $(LDFLAGS)
+LINK_FLAGS=-lgdi32 -lntdll -ld3dx9 -lwindowscodecs -lwinmm -luuid -ldwrite -lole32 -loleaut32 -Wl,-Bstatic -Wl,-lunwind -Wl,-Bdynamic -static-libstdc++ $(LDFLAGS)
 
 $(OBJDIR)/Shared/%.cpp.o: ../Shared/%.cpp
 	mkdir -p $(@D)
